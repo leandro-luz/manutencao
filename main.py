@@ -9,6 +9,7 @@ app.config.from_object(DevConfig)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+
 class User(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     username = db.Column(db.String(255))
@@ -20,6 +21,7 @@ class User(db.Model):
 
     def __repr__(self):
         return "<User '{}'>".format(self.username)
+
 
 class Post(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
@@ -33,10 +35,6 @@ class Post(db.Model):
 
     def __repr__(self):
         return "<Post '{}'>".format(self.title)
-
-
-
-
 
 
 @app.route('/')
