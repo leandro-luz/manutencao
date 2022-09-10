@@ -1,14 +1,16 @@
 
 class Config(object):
-    debug = True
-    SQLALCHEMY_DATABASE_URI = "mysql://root:@localhost/manutenção_luz_local"
-    #SQLALCHEMY_ECHO = True
-    pass
+    POSTS_PER_PAGE = 10
 
 
 class ProdConfig(Config):
-    pass
+    SECRET_KEY = 'teste123'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_DATABASE_URI = "mysql://root:@localhost/manutenção_luz_local"
 
 
 class DevConfig(Config):
     DEBUG = True
+    SECRET_KEY = 'teste123'
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    SQLALCHEMY_DATABASE_URI = "mysql://root:@localhost/manutenção_luz_local"
