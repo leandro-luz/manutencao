@@ -31,6 +31,9 @@ flask db upgrade
 echo --------------------
 echo Generating test data
 echo --------------------
-echo test_data.py
+#source venv/Scripts/activate
+#echo test_data.py
+
+# $export OAUTHLIB_INSECURE_TRANSPORT=1.
 
 

@@ -1,7 +1,14 @@
+import datetime
 from sqlalchemy import desc, func
-from flask import render_template, Blueprint, flash, redirect, url_for, current_app
-from .models import db, Post, Tag, Comment, User, tags
-from .forms import CommentForm
+from flask import render_template, Blueprint, flash, redirect, url_for, \
+    session, current_app, abort, request, get_flashed_messages
+from flask_login import login_required, current_user
+from .models import db, Post, Tag, Comment, tags
+
+from .forms import CommentForm, PostForm
+from ..auth.models import User
+from ..auth import has_role
+from .. import cache
 
 blog_blueprint = Blueprint(
     'blog',
@@ -11,6 +18,18 @@ blog_blueprint = Blueprint(
 )
 
 
+def make_cache_key(*args, **kwargs):
+    path = request.path
+    args = str(hash(frozenset(request.args.items())))
+    messages = str(hash(frozenset(get_flashed_messages())))
+    if current_user.is_authenticated:
+        roles = str(current_user.roles)
+    else:
+        roles = ""
+    return (path + args + roles + session.get('locale', '') + messages).encode('utf-8')
+
+
+@cache.cached(timeout=7200, key_prefix='sidebar_data')
 def sidebar_data():
     recent = Post.query.order_by(Post.publish_date.desc()).limit(5).all()
     top_tags = db.session.query(
@@ -22,6 +41,7 @@ def sidebar_data():
 
 @blog_blueprint.route('/')
 @blog_blueprint.route('/<int:page>')
+@cache.cached(timeout=60)
 def home(page=1):
     posts = Post.query.order_by(Post.publish_date.desc()).paginate(page,
                                                                    current_app.config.get('POSTS_PER_PAGE', 10),
@@ -34,6 +54,43 @@ def home(page=1):
         recent=recent,
         top_tags=top_tags
     )
+
+
+@blog_blueprint.route('/new', methods=['GET', 'POST'])
+@login_required
+@has_role('poster')
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        new_post = Post()
+        new_post.title = form.title.data
+        new_post.user_id = current_user.id
+        new_post.text = form.text.data
+        db.session.add(new_post)
+        db.session.commit()
+        flash('Post added', 'info')
+        return redirect(url_for('.post', post_id=new_post.id))
+    return render_template('new.html', form=form)
+
+
+@blog_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_post(id):
+    post = Post.query.get_or_404(id)
+    # We want that the current user can edit is own posts
+    if current_user.id == post.user.id:
+        form = PostForm()
+        if form.validate_on_submit():
+            post.title = form.title.data
+            post.text = form.text.data
+            post.publish_date = datetime.datetime.now()
+            db.session.merge(post)
+            db.session.commit()
+            return redirect(url_for('.post', post_id=post.id))
+        form.title.data = post.title
+        form.text.data = post.text
+        return render_template('edit.html', form=form, post=post)
+    abort(403)
 
 
 @blog_blueprint.route('/post/<int:post_id>', methods=('GET', 'POST'))
