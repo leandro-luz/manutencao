@@ -5,14 +5,10 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
     SECRET_KEY = 'teste123'
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     RECAPTCHA_PUBLIC_KEY = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
     RECAPTCHA_PRIVATE_KEY = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
     POSTS_PER_PAGE = 10
-
-    TWITTER_API_KEY = "XXXX"
-    TWITTER_API_SECRET = "XXXX"
-    FACEBOOK_CLIENT_ID = "1752917121759917"
-    FACEBOOK_CLIENT_SECRET = "25d48ca445490125237abbd213e30213"
 
 
 class ProdConfig(Config):
@@ -29,3 +25,32 @@ class DevConfig(Config):
     SQLALCHEMY_DATABASE_URI = "mysql://root:@localhost/manutenção_luz_local"
 
     CACHE_TYPE = "null"
+
+    MAIL_SERVER = 'localhost'
+    MAIL_PORT = 25
+    MAIL_USERNAME = 'username'
+    MAIL_PASSWORD = 'password'
+
+
+class TestConfig(Config):
+    TESTING = True
+
+    # DEBUG_TB_ENABLED = False
+    SQLALCHEMY_DATABASE_URI = "mysql://root:@localhost/manutenção_luz_local_teste"
+    # SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # CACHE_TYPE = 'null'
+    # CACHE_NO_NULL_WARNING = True
+    # WTF_CSRF_ENABLED = False
+    #
+    # MAIL_SERVER = 'localhost'
+    # MAIL_PORT = 25
+    # MAIL_USERNAME = 'username'
+    # MAIL_PASSWORD = 'password'
+
+
+config = {
+    'development': DevConfig,
+    'testing': TestConfig,
+    'production': ProdConfig,
+    'default': DevConfig
+}

@@ -3,10 +3,14 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_caching import Cache
+from flask_mail import Mail
+from flask_debugtoolbar import DebugToolbarExtension
 
 db = SQLAlchemy()
 migrate = Migrate()
 cache = Cache()
+debug_toolbar = DebugToolbarExtension()
+mail = Mail()
 
 
 def create_app(object_name):
@@ -23,6 +27,8 @@ def create_app(object_name):
     db.init_app(app)
     migrate.init_app(app, db)
     cache.init_app(app)
+    debug_toolbar.init_app(app)
+    mail.init_app(app)
 
     from .auth import create_module as auth_create_module
     from .blog import create_module as blog_create_module

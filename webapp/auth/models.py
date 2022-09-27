@@ -10,8 +10,8 @@ roles = db.Table(
 
 class User(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    username = db.Column(db.String(255), nullable=False, index=True, unique=True)
-    password = db.Column(db.String(255))
+    username = db.Column(db.String(50), nullable=False, index=True, unique=True)
+    password = db.Column(db.String(50))
     posts = db.relationship('Post', backref='user', lazy='dynamic')
 
     roles = db.relationship(
@@ -65,7 +65,7 @@ class User(db.Model):
 
 class Role(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(80), unique=True)
+    name = db.Column(db.String(50), unique=True)
     description = db.Column(db.String(255))
 
     def __init__(self, name):
